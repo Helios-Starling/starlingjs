@@ -1,6 +1,6 @@
 {
   "name": "@helios-starling/starling",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Modern WebSocket client for the Helios-Starling protocol",
   "main": "src/index.js",
   "type": "module",
