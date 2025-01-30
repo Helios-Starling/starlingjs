@@ -1,0 +1,1 @@
+export { Starling } from './core/starling';
