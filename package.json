@@ -1,11 +1,16 @@
 {
   "name": "@helios-starling/starling",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Modern WebSocket client for the Helios-Starling protocol",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./utils": "./src/utils/index.js"
+  },
   "type": "module",
   "scripts": {
-    "test": "bun --watch ./test/index.js"
+    "test": "bun --watch ./test/index.js",
+    "generate-types": "bunx -p typescript tsc src/**/*.js --declaration --allowJs --emitDeclarationOnly --outDir types"
   },
   "keywords": [
     "websocket",
@@ -36,7 +41,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@helios-starling/utils": "0.4.0",
+    "@helios-starling/utils": "0.4.1",
     "@killiandvcz/pulse": "^1.0.2",
     "zod": "^3.24.1"
   }

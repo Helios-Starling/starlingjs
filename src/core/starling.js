@@ -10,13 +10,11 @@ import { proxyConfiguration } from "../config/proxy.config";
 /**
 * @typedef {import("@helios-starling/utils").NetworkNodeOptions & {
 *  connectTimeout: number=10000,
-*  reconnect: boolean=true,
-*  reconnectDelay: number=10000,
-*  maxReconnectAttempts: number=5,
 *  state: import("../managers/state").StateManagerOptions,
-*  reconnection: import("../managers/reconnection").ReconnectionOptions
+*  reconnection: import("../managers/reconnection").ReconnectionOptions | false
 * }} StarlingOptions
 */
+
 
 
 /**
@@ -28,17 +26,14 @@ export class Starling extends NetworkNode {
     * @param {StarlingOptions} options 
     */
     constructor(url, options = {}) {
+        
         super({
             builtInMethods: {},
             proxyConfiguration
         }, {...options});
-        
 
         this._options = {
             connectTimeout: 10000,
-            reconnect: true,
-            reconnectDelay: 10000,
-            maxReconnectAttempts: 5,
             ...options
         }
         
@@ -58,6 +53,8 @@ export class Starling extends NetworkNode {
         this.notify = this._starling.notify.bind(this._starling);
         this.request = this._starling.request.bind(this._starling);
         this.sendError = this._starling.sendError.bind(this._starling);
+
+
     }
     
     get _ws() {
@@ -91,8 +88,6 @@ export class Starling extends NetworkNode {
                     console.log('✨ Starling connected to Helios server');
                     
                     this._lastConnected = getCurrentTimestamp();
-                    
-                    console.log('Starling connected');
                     
                     this._starling.events.emit('starling:connected', {
                         debug: {
@@ -186,7 +181,7 @@ export class Starling extends NetworkNode {
             }
         });
         
-        if (this._options.reconnect) {
+        if (!(this._options.reconnection === false)) {
             this._reconnection.start();   
         }
     }
@@ -195,12 +190,12 @@ export class Starling extends NetworkNode {
     * Gère les erreurs de connexion
     * @private
     */
-    _handleError(error) {
-        console.error('Starling error:', error);
+    _handleError(event) {
         
         this._emitEvent('error', {
-            error,
-            timestamp: getCurrentTimestamp()
+            error: new Error('Starling WebSocket error'),
+            event,
+            timestamp: getCurrentTimestamp(),
         });
     }
     
@@ -214,6 +209,11 @@ export class Starling extends NetworkNode {
             timestamp: getCurrentTimestamp()
         });
     }
+
+    onconnected = (handler) => this.events.on('starling:connected', handler);
+    ondisconnected = (handler) => this.events.on('starling:disconnected', handler);
+
+    onstatechange = (handler) => this.events.on('starling:state', handler);
     
     get createdAt() {
         return this._starling.createdAt;
@@ -250,4 +250,6 @@ export class Starling extends NetworkNode {
     get closed() {
         return this._ws && this._ws.readyState === WebSocket.CLOSED;
     }
+
+
 }
